@@ -2,10 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
+	//"fmt"
 	"github.com/PhilLar/webshorten/short"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 type shortURLWrapper struct {
@@ -47,9 +51,23 @@ func shortenURL(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
+var flagPort *int = flag.Int("port", 0, "use '-port=NUMBER' flag to run server on specific port(default: 5000)")
+const defaultPort string = ":5000"
+
+// ListenAndServeWrapper is a wrapper for http.ListenAndServ to let one specidfy PORT
+func ListenAndServeWrapper(a func(addr string, handler http.Handler) error) error {
+	flag.Parse()
+	if *flagPort > 0 {
+		return a(":"+strconv.Itoa(*flagPort), nil)
+	} else if path, exists := os.LookupEnv("PORT"); exists {
+		return a(":"+path, nil)
+	}
+	return a(defaultPort, nil)
+}
+
 func main() {
 	http.HandleFunc("/api/v1/shorten", shortenURL)
-	err := http.ListenAndServe(":5001", nil)
+	err := ListenAndServeWrapper(http.ListenAndServe)
 	if err != nil {
 		log.Fatal(err)
 	}

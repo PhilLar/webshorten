@@ -47,7 +47,7 @@ func ShortenUrls() map[string]error {
 	if !*flagRelink {
 		return RunInParallel(CleanURL, flag.Args())
 	}
-		return RunInParallel(Relink, flag.Args())
+	return RunInParallel(Relink, flag.Args())
 }
 
 func CleanURL(urlLink string) (string, error) {
@@ -107,4 +107,3 @@ func Relink(urlLink string) (string, error) {
 	cleanURL := "https://rel.ink/" + short
 	return cleanURL, err
 }
-
