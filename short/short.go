@@ -13,17 +13,17 @@ import (
 	"sync"
 )
 
-const CleanUrlApi string = "https://cleanuri.com/api/v1/shorten"
-const RelinkApi string = "https://rel.ink/api/links/"
+const cleanURLAPI string = "https://cleanuri.com/api/v1/shorten"
+const relinkAPI string = "https://rel.ink/api/links/"
 
 var flagRelink *bool = flag.Bool("relink", false, "use rel.ink service to shorten URL")
 
-type CleanUrlAnswer struct {
-	ResultUrl string `json:"result_url"`
+type cleanURLAnswer struct {
+	ResultURL string `json:"result_url"`
 	Error     string
 }
 
-// Wrapper for CleanUrl() and Relink()
+//RunInParallel is a wrapper for cleanURL() and Relink()
 func RunInParallel(a func(urlLink string) (string, error), args []string) map[string]error {
 	shorts := make(map[string]error)
 	var mutex = &sync.Mutex{}
@@ -45,14 +45,13 @@ func RunInParallel(a func(urlLink string) (string, error), args []string) map[st
 func ShortenUrls() map[string]error {
 	flag.Parse()
 	if !*flagRelink {
-		return RunInParallel(CleanUrl, flag.Args())
-	} else {
-		return RunInParallel(Relink, flag.Args())
+		return RunInParallel(CleanURL, flag.Args())
 	}
+		return RunInParallel(Relink, flag.Args())
 }
 
-func CleanUrl(urlLink string) (string, error) {
-	resp, err := http.PostForm(CleanUrlApi, url.Values{
+func CleanURL(urlLink string) (string, error) {
+	resp, err := http.PostForm(cleanURLAPI, url.Values{
 		"url": {urlLink},
 	})
 	if err != nil {
@@ -64,16 +63,15 @@ func CleanUrl(urlLink string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	answer := &CleanUrlAnswer{}
+	answer := &cleanURLAnswer{}
 	err = json.Unmarshal(body, answer)
 	if err != nil {
 		return "", err
 	}
 	if answer.Error != "" {
 		return "", errors.New(answer.Error)
-	} else {
-		return answer.ResultUrl, nil
 	}
+	return answer.ResultURL, nil
 }
 
 func Relink(urlLink string) (string, error) {
@@ -83,7 +81,7 @@ func Relink(urlLink string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	resp, err := http.Post(RelinkApi, "application/json", bytes.NewBuffer(jsn))
+	resp, err := http.Post(relinkAPI, "application/json", bytes.NewBuffer(jsn))
 	if err != nil {
 		return "", err
 	}
@@ -106,17 +104,7 @@ func Relink(urlLink string) (string, error) {
 		return "", errors.New("failed in type assertion")
 	}
 
-	cleanUrl := "https://rel.ink/" + short
-	return cleanUrl, err
+	cleanURL := "https://rel.ink/" + short
+	return cleanURL, err
 }
 
-// func main() {
-// 	resultMap := ShortenUrls()
-// 	for short, err := range resultMap {
-// 		if err == nil {
-// 			fmt.Println(short)
-// 		} else {
-// 			log.Fatal(err)
-// 		}
-// 	}
-// }
