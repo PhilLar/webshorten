@@ -1,5 +1,5 @@
 # webshorten
-n URL shortening web service using the only standard library and clearuri.com API
+URL shortening web service using the only standard library and clearuri.com API
 =====
 
 `webshorten` is the tool to shorten URL by sending POST reqs to a specified URL.
@@ -23,12 +23,12 @@ webshorten
 ```
 OR
 accompany with a flag
-``sh
+```sh
 webshorten -port 5001
 ```
 OR
 accompany with PORT env var specified
-``sh
+```sh
 PORT=8080 webshorten
 ```
 (default port value is ":5000")
