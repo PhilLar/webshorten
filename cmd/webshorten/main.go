@@ -2,10 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"github.com/PhilLar/webshorten/short"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 type shortURLWrapper struct {
@@ -43,13 +46,28 @@ func shortenURL(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println(r.Method, r.URL)
+	log.Println(r.Host)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 }
 
+var port int
+
+func init() {
+	defPort := 5000
+	if portVar, ok := os.LookupEnv("PORT"); ok {
+		if portValue, err := strconv.Atoi(portVar); err == nil {
+			defPort = portValue
+		}
+	}
+	flag.IntVar(&port, "port", defPort, "port to listen on")
+}
+
 func main() {
+	flag.Parse()
 	http.HandleFunc("/api/v1/shorten", shortenURL)
-	err := http.ListenAndServe(":5001", nil)
+	err := http.ListenAndServe(":"+strconv.Itoa(port), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
