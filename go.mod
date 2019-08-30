@@ -1,2 +1,2 @@
-// +heroku install ./cmd/...
-go 1.12
+// +heroku install ./cmd/... ./webshorten
+go 1.12.9
